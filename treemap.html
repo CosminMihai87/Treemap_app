@@ -1,0 +1,682 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en">
+<head> 
+<title>GFK Treemaping Application</title>
+<!-- <meta http-equiv="content-type" content="text/html;charset=utf-8" /> -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" /> <!-- this forces compatibility view-->
+	<script type="text/javascript" src="js/jquery-1.11.1.js"></script>
+    <script type="text/javascript" src="js/jqwidgets/jqxcore.js"></script>
+    <script type="text/javascript" src="js/jqwidgets/jqxdata.js"></script>
+    <script type="text/javascript" src="js/jqwidgets/jqxtreemap.js"></script>  
+    <link rel="stylesheet" href="styles/jqx.base.css" type="text/css"/> 
+	   
+	<script type="text/javascript" src="js/jquery-1.11.4.js"></script>
+	<link rel="stylesheet" href="styles/jquery-ui.css" type="text/css"/>
+ 
+	<script type="text/javascript"  src="js/jqwidgets/jquery.handsontable.full.js"></script> 
+	<link rel="stylesheet" media="screen" href="styles/jquery.handsontable.full.css" type="text/css"/>	
+	 
+	<script type="text/javascript"  src="js/html2canvas.js"></script>  
+	
+	<script type="text/javascript" src="js/css-pop.js"></script>
+	
+	<link rel="stylesheet" href="styles/popup-styles.css" type="text/css"/> 
+	
+ <style>  
+	.tabletextarea  {
+		height: 15px;
+		width: 35px; 
+	}
+	div,fieldset {
+		font-family: 'Arial'; 
+		font-size: 14px;
+	}   
+	fieldset { 
+		border: 1px #000000 solid;
+	}   
+	.ui-slider {
+		margin: 2px 0; 
+	}
+	hr { 
+		background-color: black;
+		height: 1px;
+		border: 0; 
+	}
+	.Pagebuttons {
+		font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+		background: url(images/send-message-button.png) repeat-x 0 0 #ffffff;
+		margin-bottom: 20px;
+		margin-top: 0px;
+		cursor: pointer;
+		height: 40px; 
+		width: 160px;
+		border-width: 0px;
+		font-weight: bold;
+		font-size: 14px;
+		color: #ffffff;
+		margin-right: 10px; 	
+	}
+	#HelpBtn { 
+		background: url(images/help.png) repeat-x 0 0 #ffffff;
+		width: 61px;
+		height: 25px; 
+	} 
+	 
+ </style>
+
+<script>
+$(document).ready(function() {  
+
+////////////////////////INIT:   
+$("#treemap").css("background-color","#C2CCD5");
+$('#togglehelp').hide();
+$('#Period').hide();
+$('#PeriodForm').hide(); 
+$('#Preview').hide();
+$('#DisplayText').hide();
+$('#DisplayFonts').hide();
+$('#BoxSize').hide();
+$('#Bolded').hide();
+$('#DownloadBtn').hide(); 
+$("#DivLegend").hide(); 
+var boxwidth = '955';
+var boxheight = '520';
+////Legend numbers:
+$('#xlegend1').text('-5');
+$('#xlegend21').text('-5');
+$('#xlegend22').text('-2');
+$('#xlegend31').text('-2');
+$('#xlegend32').text('-1');
+$('#xlegend4').text('1');
+$('#xlegend51').text('1');
+$('#xlegend52').text('2');
+$('#xlegend61').text('2');
+$('#xlegend62').text('5');
+$('#xlegend7').text('5');
+////
+$('#legend1').val('-5');
+$('#legend21').val('-5');
+$('#legend22').val('-2');
+$('#legend31').val('-2');
+$('#legend32').val('-1'); 
+$("#legend41").text('-1');
+$("#legend411").text('-1');
+$("#legend42").text('+1');
+$("#legend422").text('+1');
+$('#legend51').val('1');
+$('#legend52').val('2');
+$('#legend61').val('2');
+$('#legend62').val('5');
+$('#legend7').val('5');
+////Period numbers
+$('#textperiod1').val('Value [ron] 2015 vs. 2014'); 
+$('#xtextperiod1').text('Value [ron] 2015 vs. 2014'); 
+////////////////
+$('#TbParameters').append("<button type='button' id='AddMeasure'>Add New Measure</button></td>");  
+$('#TbParameters').append("<button type='button' id='DeleteMeasure'>Delete Last Row</button></td>");  
+
+///////////////////////IF browser= IE we start with 
+//if (BowserIdentify()=="IE") {
+//		 alert("You might be using an older version of Internet Explorer, please Scroll down and read the Help.");
+//		 $('#HelpContent').show();
+//} 
+
+///////////////////////Legend boxes validation and other :                                                                                                                                                                                                  
+$("input[id*='legend']").change(function(){ 
+	if ($(this).val()!="-")  { 
+		if ((parseFloat($(this).val()).toString() === $(this).val().toString()) == false ) {
+			$(this).val("")
+			alert("Please insert a valid number!")
+		}
+	}    
+	if ( $("[id='x"+$(this).attr("ID")+"']").text() !=  $(this).val() ) {
+		$("[id='x"+$(this).attr("ID")+"']").text( $(this).val() );
+	}	
+	$("#legend41").text($("#legend32").val());
+	$("#legend411").text($("#legend32").val());
+	$("#legend42").text($("#legend51").val());
+	$("#legend422").text($("#legend51").val());
+});    
+$("input[id^='textperiod']").change(function(){    
+	$("#xtextperiod1").text($("#textperiod1").val());
+}); 
+
+///////////////////////Excel sheet embed and copy paste:   
+$("#dataTable").handsontable({
+    colHeaders: ["Label &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "Value&nbsp;&nbsp;&nbsp;&nbsp;", "Trend&nbsp;&nbsp;"],        
+});
+var data = [
+	  [ "1st Item", 1, -6, ] 
+	//   [ "2nd Item", 2, 0, ],
+	//   [ "3rd Item", 3, 6, ],
+	//   [ "", , , ],
+	//   [ "", , , ],
+	//   [ "", , , ],
+	//   [ "", , , ],
+	//   [ "", , , ],
+	//   [ "", , , ],
+	//   [ "", , , ],
+	//   [ "", , , ]
+];
+$("#dataTable").handsontable("loadData", data);
+$('.htCore .colHeader').css('font-weight','bold');
+
+///////////////////////Function to check if the embeded excel is filled it properly and ready for drawing
+function ReadyforDrawing(value) {
+	var returnvalue=true; 
+	for (var i=1; i<=$('table .htCore tbody').eq(0).find('tr').length-1; i++){  
+		$('table .htCore tbody').eq(0).find('tr').eq(i).find("td").eq(0).text()
+	}
+	return returnvalue;
+}  
+   
+//////////////////////Preview and Save the canvas image 
+$('#DownloadBtn').click(function(){  
+	$('#previewImage').html("");
+	var element = $("#exported"); // global variable
+	var getCanvas; // global variable  
+		//capturing the image in the previewImage element
+         html2canvas(element, {
+         onrendered: function (canvas) {
+                $("#previewImage").append(canvas); 
+				
+				$("#popUpDiv").find('img').remove(); 
+				var popupimg = document.createElement('img');
+				popupimg.src = canvas.toDataURL("image/jpg");
+				$("#popUpDiv").append(popupimg);
+				$("#popUpDiv").width($("canvas")[0].width);
+				$("#popUpDiv").height($("canvas")[0].height+30);
+                getCanvas = canvas;  
+				
+				popup('popUpDiv'); 
+				////downloading the image captured 
+				//var a = document.createElement('a');
+				//// toDataURL defaults to png, so we need to request a jpeg, then convert for file download.
+				//a.href = canvas.toDataURL("image/jpg"); 
+				//a.download = 'ExportedChart.jpg';
+				//a.id = "downloadlink";
+				//document.body.appendChild(a); 
+				//fireEvent(document.getElementById("downloadlink"),'click'); 
+             } 
+    });  
+	//$('#Preview').show();    
+}); 
+ 
+$('#DownloadPicBtn').click(function(){    
+	if (BowserIdentify()=="IE") {
+		var blob = $("canvas")[0].msToBlob();
+		window.navigator.msSaveBlob(blob, 'ExportedChart.jpg');  
+	}
+	else { 
+		var a = document.createElement('a');  
+		a.href = $("#popUpDiv").find('img')[0].src;
+		a.download = 'ExportedChart.jpg';
+		document.body.appendChild(a); 
+		a.click();
+	};  
+}); 
+ 
+function BowserIdentify() { 
+	var toreturn = '';
+     if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 ) 
+    {
+        toreturn = 'Opera';
+    }
+    else if(navigator.userAgent.indexOf("Chrome") != -1 )
+    {
+        toreturn = 'Chrome';
+    }
+    else if(navigator.userAgent.indexOf("Safari") != -1)
+    {
+        toreturn = 'Safari';
+    }
+    else if(navigator.userAgent.indexOf("Firefox") != -1 ) 
+    {
+        toreturn = 'Firefox';
+    }
+    else if((navigator.userAgent.indexOf("MSIE") != -1 ) || (!!document.documentMode == true )) //IF IE > 10
+    {
+      toreturn = 'IE'; 
+    }  
+    else 
+    {
+       toreturn = 'unknown';
+    }
+	return toreturn;
+}
+ 
+function fireEvent(obj, evt) {
+    var fireOnThis = obj; 
+    if (document.createEvent) {
+        // alert("FF");
+        var evtObj = document.createEvent('MouseEvents');
+        evtObj.initEvent(evt, true, false);
+        fireOnThis.dispatchEvent(evtObj);
+    }  
+    else if (document.createEventObject) {
+        // alert("IE");
+        var evtObj = document.createEventObject();
+        fireOnThis.fireEvent('on'+evt, evtObj);
+    }
+}
+ 
+ 
+////////////////////////Trend Color Function
+function TrendColor(value) {
+	var whattoreturn='';
+	if (value < parseFloat($('#legend1').val()))  
+		whattoreturn = '#9b1f23'; 
+	if ((value < parseFloat($('#legend22').val()))&&(value >= parseFloat($('#legend21').val())))  
+		whattoreturn = '#dc291e';   
+	if ((value < parseFloat($('#legend32').val()))&&(value >= parseFloat($('#legend31').val())))  
+		whattoreturn ='#e94f35';  
+	if ((value <= parseFloat($('#legend51').val()))&&(value >= parseFloat($('#legend32').val())))  
+		whattoreturn = '#ffd600'; 	
+	if ((value <= parseFloat($('#legend52').val()))&&(value > parseFloat($('#legend51').val())))  
+		whattoreturn = '#d7cf42';  
+	if ((value <= parseFloat($('#legend62').val()))&&(value > parseFloat($('#legend61').val())))  
+		whattoreturn = '#c1bb00';  
+	if (value > parseFloat($('#legend7').val()))  
+		whattoreturn = '#a2ad00';  	 
+	return whattoreturn;
+} 
+  
+////////////////////////The draw function:
+function drawfunction(height,width){
+	var field_not_answered = false
+	$('.tabletextarea').each(function(){
+		if  ($(this).val()=="") {
+			field_not_answered = true
+		}
+	}); 
+	if (field_not_answered==false) { 
+		//constructing the array with measures form the excel:
+		var data = [];   
+		if ($('table .htCore tbody').eq(0).find('tr').length>1) {
+			for (var i=0; i<=$('table .htCore tbody').eq(0).find('tr').length-1; i++){   
+				var tablerow = $('table .htCore tbody').eq(0).find('tr').eq(i).find("td");
+				if (((tablerow.eq(0).text().length>0)&&(tablerow.eq(1).text().length>0)&&(tablerow.eq(2).text().length>0))&& (isNaN(parseFloat(tablerow.eq(1).text()))!=true) && (isNaN(parseFloat(tablerow.eq(2).text()))!=true)) {
+					data.push({ 
+						label: $('table .htCore tbody').eq(0).find('tr').eq(i).find("td").eq(0).text(),
+						value: parseFloat($('table .htCore tbody').eq(0).find('tr').eq(i).find("td").eq(1).text()),
+						color: TrendColor(parseFloat( $('table .htCore tbody').eq(0).find('tr').eq(i).find("td").eq(2).text() ))
+					}); 
+				}else{
+					if (((tablerow.eq(0).text().length==0)||(tablerow.eq(1).text().length==0)||(tablerow.eq(2).text().length==0)) && !((tablerow.eq(0).text().length==0)&&(tablerow.eq(1).text().length==0)&&(tablerow.eq(2).text().length==0))) {
+						alert("Please fill in all three values on a row : Label, Value, Trend.")
+					};	
+				};	
+			};
+		}; 
+		//running the function to create the layout:		
+		$(function () { 
+			$('#treemap').jqxTreeMap({ 
+				width: width,
+				height: height, 
+				source: data, 
+				renderCallbacks: {
+					'*': function (element, data) {
+						element.css({
+							color: '#ffffff'
+						});
+						element.html('<span style="font-size:12px;" class="jqx-treemap-label">' + data.label + ', ' + data.value + '%</span>');
+						return true;
+					}
+				}
+			});    
+			//arrange the borders of the elements: 
+			//$('.jqx-treemap-rectangle').css('border-radius','3px'); //adding the curved border for each element.
+			$('.jqx-treemap-rectangle span').each(function(){
+				$(this).text($(this).text().slice(0,-1));
+			}); 
+			//if the BG color is yellow we change the text writing on the cube to grey:
+			$(".jqx-treemap-rectangle").each(function(){
+				if ($(this).css("background-color") == "rgb(255, 214, 0)")  { 
+					$(this).css("color", "rgb(128, 128, 128)"); 
+				}
+			});  
+		});
+		} else {
+			alert("Please fill in all fields!")
+		};  
+		$("#exported").css("background-color","#FFFFFF");
+		$("#defaultGFKtext").hide(); 
+		$('#LegendPeriodTable').height($('#treemap').height()+10);
+		
+		$('.jqx-treemap-rectangle').css('border','2px solid #FFFFFF'); //making the border of each element smaller 
+		//aranging the text of each box, centering to box
+		$(".jqx-treemap-rectangle span").each(function(){ 
+			$(this).css('width', $(this).parent().width()- 7);	//7px is the white border radius of each element ;
+			$(this).css('top', (($(this).parent().height()/2)-($(this).height()/2)) );	 
+			$(this).css('left', (($(this).parent().width()/2)-($(this).width()/2)) );
+			$(this).css('text-align','center')		
+		});	
+} 
+
+$("#DivLegend").draggable({ containment: "parent" });  
+
+$('#DrawBtn').click(function() { 
+	$('#DisplayText').show();
+	$('#DisplayText :radio').eq(0).prop("checked","true");
+	$('#DisplayFonts').show();
+	$('#scale1').slider('value','14');
+	$('#scale2').slider('value','12');
+	$('#BoxSize').show();
+	$('#Bolded').show();
+	$('#BoxSize :radio').eq(0).prop("checked","true");
+	$('#DownloadBtn').show(); 
+	$("#DivLegend").show(); 
+	$('#Period').show(); 
+	$('#PeriodForm').show(); 
+	$("#treemap").css("background-color","#FFFFFF");
+	drawfunction(boxheight,boxwidth);
+}); //DRAW button 
+
+///////////Display text options: grouped Radio button list 
+$('#DisplayText :radio').click(function() {	
+	if ($(".jqx-treemap-rectangle span").length>0) { 
+	
+		///////FIRST radio button functionality:
+		if ($('#DisplayOp1').prop("checked")) {
+			drawfunction(boxheight,boxwidth); //default drawing options = Label + Value
+		}
+		///////SECOND radio button functionality: 
+		if ($('#DisplayOp2').prop("checked")) {
+			drawfunction(boxheight,boxwidth);
+			$(".jqx-treemap-rectangle span").each(function(){ 
+				for (var i=$(this).text().length-1; i>=0; i--){
+					var strchar = $(this).text(); 
+					if ( ($.isNumeric(strchar[i])) && (strchar[i-1]==" ") && (strchar[i-2]==",") ){  
+						var xLabel = strchar.substring(0,i-2);
+						var xValue = strchar.substring(i-1,$(this).text().length);
+						var xTrend = "";
+						for (var i=0; i<=$('table .htCore tbody').eq(0).find('tr').length-1; i++){  
+							var tablerow = $('table .htCore tbody').eq(0).find('tr').eq(i).find("td");
+							if (((tablerow.eq(0).text().length>0)&&(tablerow.eq(1).text().length>0)&&(tablerow.eq(2).text().length>0))&& (isNaN(parseFloat(tablerow.eq(1).text()))!=true) && (isNaN(parseFloat(tablerow.eq(2).text()))!=true)) {
+								if ((tablerow.eq(0).text()==xLabel)&&(parseFloat(tablerow.eq(1).text())==parseFloat(xValue))) {  
+									xTrend = tablerow.eq(2).text();
+									break;
+								};
+							};	
+						}  
+		 				$(this).text(xLabel+", "+xTrend); 
+		 				break;
+		 			} 
+				}	
+			});	
+		}
+		///////THIRD radio button functionality: 
+		if ($('#DisplayOp3').prop("checked")) {
+			drawfunction(boxheight,boxwidth);
+			$(".jqx-treemap-rectangle span").each(function(){ 
+				for (var i=$(this).text().length-1; i>=0; i--){
+					var strchar = $(this).text(); 
+					if ( ($.isNumeric(strchar[i])) && (strchar[i-1]==" ") && (strchar[i-2]==",") ){  
+		 				$(this).text(strchar.substring(0,i-2))  
+		 				break;
+		 			} 
+				}	
+			});	
+		}
+		/////////////////////
+	};	
+});
+
+
+//////////////////////Box Size by Ratio: 
+$('#BoxSize :radio').click(function() {	
+	if ($(".jqx-treemap-rectangle span").length>0) {  
+		///////FIRST radio button functionality:
+		if ($('#BoxSizebtn1').prop("checked")) {
+			boxheight = '520';
+			boxwidth = '955';
+			drawfunction(boxheight,boxwidth);  
+		}
+		///////SECOND radio button functionality: 
+		if ($('#BoxSizebtn2').prop("checked")) {
+			boxheight = '600';
+			boxwidth = '835';
+			drawfunction(boxheight,boxwidth); 
+		}  
+	};	
+});
+/////////////////////
+
+//////////////////////Legend and Boxes Label FONT - SLIDERS
+//Scale1 = Legend font scale:
+$(function() {
+  $('#scale1').slider({
+    orientation: 'horizontal',
+    range: 'min',  
+    min: 10,
+    max: 18,
+    step: 0.5,
+    value: 1,
+    slide: refreshScale,
+    change: refreshScale
+  });
+  
+  function refreshScale() {
+    var scale = $('#scale1').slider('value');
+    $("#DivLegend tr td").css("font-size",+$('#scale1').slider('value')+"px");
+	$("#Period").css("font-size",+$('#scale1').slider('value')+"px"); 
+  }
+});
+//Scale2 = Boxes(Label) font scale:
+$(function() {
+  $('#scale2').slider({
+    orientation: 'horizontal',
+    range: 'min',  
+    min: 10,
+    max: 25,
+    step: 0.5,
+    value: 1,
+    slide: refreshScale,
+    change: refreshScale
+  });
+  
+  function refreshScale() {
+    var scale = $('#scale2').slider('value');
+    $(".jqx-treemap-rectangle span").each(function(){
+		$(this).css("font-size",+$('#scale2').slider('value')+"px") 
+		$(this).css('width', $(this).parent().width()- 7);	//7px is the white border radius of each element ;
+		$(this).css('top', (($(this).parent().height()/2)-($(this).height()/2)) );	 
+		$(this).css('left', (($(this).parent().width()/2)-($(this).width()/2)) );
+		$(this).css('text-align','center')		
+	});	
+  }
+});
+//////////////////////
+
+//////////////////////Add bold to Legend/Period + Hide Period
+$('#Bolded :checkbox').change(function() {	
+	if ($('#Boldcheckbox1').prop('checked')==true) {  
+		$('#DivLegend tr td').css('font-weight','bold');
+	} else {
+		$('#DivLegend tr td').css('font-weight','normal');
+	};	
+	if ($('#Boldcheckbox2').prop('checked')==true) { 
+		$('#Period').css('font-weight','bold');
+	} else {
+		$('#Period').css('font-weight','normal');
+	};
+});
+$('#PeriodForm :checkbox').change(function() {	
+	if ($('#HidePeriod').prop('checked')==true) {  
+		$('#Period').hide();
+	} else {
+		$('#Period').show();
+	};	
+});
+//////////////////////
+  
+//////////////////////slide toggle events on the information :  
+$("#HelpBtn").click(function(){ 
+    $('#togglehelp').toggle('slow');  
+	
+    $("#HelpContent").slideToggle("slow");
+    $(this).toggleClass("active"); return false;
+});  
+  
+}); //Document ready function
+
+</script>
+</head> 
+<body> 
+<table>
+	<div>
+	<tr id="exported" style="margin-right:40px; margin-left:40px; margin-top:40px; padding-bottom:40px; height:549px; width:986px;"> 
+		<td> 
+			<div class="treemapclass" id="treemap" style="margin-right:30px; height:520px; width:955px; border-width:1px"> <div id="defaultGFKtext" style="float:right;  vertical-align:middle; color:white; font-size:200%; "></div> </div>   
+		</td> 
+		<td> 
+			<table id="LegendPeriodTable"><tr ><td> 
+			<div id='DivLegend' style="margin-left:15px;">
+				<table>
+					<tr style="height:30px;"><td bgcolor="#9b1f23" id="xlegend_color1" style="height:15px; width:45px; border-radius:5px"></td><td>Decline more than <span id="xlegend1" ></span>%</td></tr>
+					<tr style="height:30px;"><td bgcolor="#dc291e" id="xlegend_color2" style="height:15px; width:45px; border-radius:5px"></td><td>Decline between <span id="xlegend21" ></span>% and <span id="xlegend22"></span>%</td></tr>
+					<tr style="height:30px;"><td bgcolor="#e94f35" id="xlegend_color3" style="height:15px; width:45px; border-radius:5px"></td><td>Decline between <span id="xlegend31" ></span>% and <span id="xlegend32"></span>%</td></tr>
+					<tr style="height:30px;"><td bgcolor="#ffd600" id="xlegend_color4" style="height:15px; width:45px; border-radius:5px"></td><td>Constant between <span id="legend411"></span>% and <span id="legend422"></span>%</td></tr>
+					<tr style="height:30px;"><td bgcolor="#d7cf42" id="xlegend_color5" style="height:15px; width:45px; border-radius:5px"></td><td>Growth between <span id="xlegend51" ></span>% and <span id="xlegend52"></span>%</td></tr>
+					<tr style="height:30px;"><td bgcolor="#c1bb00" id="xlegend_color6" style="height:15px; width:45px; border-radius:5px"></td><td>Growth between <span id="xlegend61" ></span>% and <span id="xlegend62"></span>%</td></tr>
+					<tr style="height:30px;"><td bgcolor="#a2ad00" id="xlegend_color7" style="height:15px; width:45px; border-radius:5px"></td><td>Growth more than <span id="xlegend7" ></span>%</td></tr> 
+				</table>
+			</div> 
+			</td></tr>
+			<tr><td style="vertical-align:bottom; height:30px">
+				<div id="Period" style="margin-left:15px; vertical-align:bottom;"> <span id="xtextperiod1" style=""></span> </div>  	
+			</td></tr></table> 
+		</td> 		
+	<div style="float:right;"> <img src="images/GfKLogo_neu.bmp" id="GFKLogo" alt="GFK Logo"> </div> 
+	</tr>  
+	</div>  
+</table> 
+<hr/> 
+<table>
+	<tr>
+	<td style="padding-top:5px; padding-right:20px; padding-left:20px; vertical-align:top;"> 
+		<div id="dataTable"></div>   
+	</td>  
+	<td style="border-left:thin solid; padding-top:5px; padding-right:25px; padding-left:25px; vertical-align:top;" >
+		<table><tr><td>
+			<div>
+				<table>
+					<tr><td bgcolor="#9b1f23" id="legend_color1" style="height:15px; width:45px; border-radius:5px"></td><td>Decline more than </td><td><input type="text" class="tabletextarea" id="legend1"> %</td></tr>
+					<tr><td bgcolor="#dc291e" id="legend_color2" style="height:15px; width:45px; border-radius:5px"></td><td>Decline between </td><td><input type="text" class="tabletextarea" id="legend21"> % and <input type="text" class="tabletextarea" id="legend22"> %</td></td></tr>
+					<tr><td bgcolor="#e94f35" id="legend_color3" style="height:15px; width:45px; border-radius:5px"></td><td>Decline between </td><td><input type="text" class="tabletextarea" id="legend31"> % and <input type="text" class="tabletextarea" id="legend32"> %</td></td></tr>
+					<tr><td bgcolor="#ffd600" id="legend_color4" style="height:23px; width:45px; border-radius:5px"></td><td>Constant between </td><td><span id="legend41"></span>% and <span id="legend42"></span>%</td></tr>
+					<tr><td bgcolor="#d7cf42" id="legend_color5" style="height:15px; width:45px; border-radius:5px"></td><td>Growth between </td><td><input type="text" class="tabletextarea" id="legend51"> % and <input type="text" class="tabletextarea" id="legend52"> %</td></td></tr>
+					<tr><td bgcolor="#c1bb00" id="legend_color6" style="height:15px; width:45px; border-radius:5px"></td><td>Growth between </td><td><input type="text" class="tabletextarea" id="legend61"> % and <input type="text" class="tabletextarea" id="legend62"> %</td></td></tr>
+					<tr><td bgcolor="#a2ad00" id="legend_color7" style="height:15px; width:45px; border-radius:5px"></td><td>Growth more than </td><td><input type="text" class="tabletextarea" id="legend7"> %</td></tr>
+				</table>
+			</div>
+		</td></tr>
+		<tr><td>
+			<form id='PeriodForm' style="padding-top:15px;" >
+			  <fieldset style="width:250px">
+				<legend><b>Period Options</b></legend>  
+					<div id="Period">Text Input: <input type="text" class="tabletextarea" id="textperiod1" style="text-align:center; width:170px"> </div>  
+					<div id="HidePeriodDiv">Hide Period: <input type="checkbox" id="HidePeriod" value="1" />  </div> 
+			  </fieldset>
+			</form> 
+		</td></tr></table> 
+	</td>	
+	<td style="border-left:thin solid; padding-top:5px; padding-right:20px; padding-left:20px; vertical-align:top;" >  
+		<table> 
+		<tr> 
+		<td>
+			<table> 
+				<tr> 
+					<td style="vertical-align:top;">
+						<span><input id="DrawBtn" type="button" value="Draw" class="Pagebuttons" /></span>   
+						<span><input id="DownloadBtn" type="button" value="Preview&Download" class="Pagebuttons" /></span>
+					</td> 
+				</tr> 
+				<tr> 
+					<td>
+					<table> <tr> <td>
+						<form id='DisplayText'>
+						  <fieldset style="width:200px">
+							<legend><b>Label Options:</b></legend> 
+							  <input type="radio" name="size" id="DisplayOp1" value="1" />
+							  <label for="DisplayOp1">Label + Value</label>  <br/>
+							  <input type="radio" name="size" id="DisplayOp2" value="2" />
+							  <label for="DisplayOp2">Label + Trend</label>  <br/>
+							  <input type="radio" name="size" id="DisplayOp3" value="3" />
+							  <label for="DisplayOp3">Label</label> 
+						  </fieldset>
+						</form>  </td> <td style="vertical-align:top;">
+						<form id='BoxSize'>
+						  <fieldset style="width:150px">
+							<legend><b>Box Size by Ratio:</b></legend> 
+							  <input type="radio" name="size" id="BoxSizebtn1" value="1" />
+							  <label for="BoxSizebtn1">16:9</label>  <br/>
+							  <input type="radio" name="size" id="BoxSizebtn2" value="2" />
+							  <label for="BoxSizebtn2">4:3</label>   
+						  </fieldset>
+						</form> 
+					</td> </tr>	</table> 		
+					</td> 
+				</tr>  
+				<tr>
+					<td>
+					<table> <tr> <td>
+						<form id='DisplayFonts'>
+						 <fieldset style="width:200px">
+							<legend><b>Font Scale:</b></legend> 
+							<div>Legend&Period:</div><div id="scale1" class="slider"></div> <br/>
+							<div>Label:</div><div id="scale2" class="slider"></div> 
+						 </fieldset>
+						</form> </td> <td style="vertical-align:top;"> 
+						<form id='Bolded'>
+						  <fieldset style="width:150px">
+							<legend><b>Add Bold to:</b></legend> 
+							  <input type="checkbox" name="Legend" id="Boldcheckbox1" value="1" />
+							  <label for="Boldcheckbox1">Legend</label>  <br/>
+							  <input type="checkbox" name="Period" id="Boldcheckbox2" value="2" />
+							  <label for="Boldcheckbox2">Period</label>   
+						  </fieldset>
+						</form> 
+					</td> </tr>	</table> 			
+					</td>
+				</tr>	
+			</table>
+		</td> 
+		<td style="vertical-align:top;"> 
+			<span id="Preview"><b>Preview:</b><div id="previewImage" style=""></div></span>
+		</td> 
+		</tr>  
+		</table> 
+	</td>
+	</tr>
+</table>   
+<hr/> 
+<div style="float:right;"> <span id="togglehelp"> Press again to close.</span> <span><input id="HelpBtn" type="button" value="Help" class="Pagebuttons"/></span> </div> 
+
+<!--SLIDE DOWN Help-->  
+<div id="HelpContent" style="display:none;" > 
+	<p><b>Troubleshooting:</b></p> <ul>
+		<li>If you are using Internet Explorer and you receive a pop-up at the bottom of the page to allow ActiveX controls please click on <i>Allow blocked content</i>.</li>
+		<img src="images/Allow-Active-x.jpg" id="Allow-Active-x" alt="Allow-Active-x" style="width:50%"> <br/>
+		<li>If you are using Internet Explorer please make sure you have dissabled <i>Display internet sites in Compatibility view</i> from the <i>Compatibility View</i> tab under Options. </li>
+		--> <img src="images/compatibility1.png" id="compatibility1" alt="compatibility1" style="width:15%"> --> <img src="images/compatibility2.png" id="compatibility2" alt="compatibility2" style="width:15%">
+	</ul>
+</div>	 
+<!--/SLIDE DOWN --> 
+
+
+<!--POPUP Preview&Download-->     
+    <div id="blanket" style="display:none;" ></div>  
+		<div id="popUpDiv" style="display:none;">  
+			<div id="topbar" style="background-color:white; width=400px;">
+				<span><input id="ClosePopupBtn" type="button" value="Close" onclick="popup('popUpDiv')" class="Pagebuttons" /></span>  
+				<span><input id="DownloadPicBtn" type="button" value="Download" class="Pagebuttons" /></span> 	 
+			<div>
+		</div> 
+	</div>	 
+<!-- / POPUP-->   
+  
+
+</body>
+</html>
